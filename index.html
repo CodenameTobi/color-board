@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="styles.css" />
+        <title>Color Board</title>
+    </head>
+    <body>
+        <div class="main-container">
+            <div id="run-button-container" class="run-button-container">
+                <button id="run-button" class="run-button">Draw Color Animation</button>
+            </div>
+            <div id="color-container" class="color-container">
+                <div id="placeholder" class="placeholder"></div>
+            </div>
+            <div class="setting-container">
+                <div id="settings" class="settings">
+                    <div class="label-input-container">
+                        <label for="start-from">Start From</label>
+                        <select id="start-from" name="start-from">
+                            <option value="center">Center</option>
+                            <option value="top-left">Top Left</option>
+                        </select>
+                    </div>
+                    <div class="label-input-container">
+                        <label for="cols">Columns</label>
+                        <input id="cols" name="cols" type="number" min="10" max="1000" step="1" value="50" />
+                    </div>
+                    <div class="label-input-container">
+                        <label for="coherence">Coherence</label>
+                        <input id="coherence" name="coherence" type="number" min="0" max="0.99" step="0.01" value="0.9" />
+                    </div>
+                    <div class="label-input-container">
+                        <label for="opacity">Opacity</label>
+                        <input id="opacity" name="opacity" type="number" min="0.3" max="1" step="0.05" value="1" />
+                    </div>
+                    <div class="label-input-container">
+                        <label for="delay">Delay</label>
+                        <input id="delay" name="delay" type="number" min="0" max="1" step="0.001" value="0.001" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="script.js"></script>
+</html>

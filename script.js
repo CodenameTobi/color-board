@@ -1,0 +1,165 @@
+const colorContainer = document.getElementById('color-container');
+const size = 600; // Change if px size of colorContainer changes.
+const runButton = document.getElementById('run-button');
+const placeholder = document.getElementById('placeholder');
+const startFromSelect = document.getElementById('start-from');
+const colNumberInput = document.getElementById('cols'); // Determines the size of the grid.
+const coherenceInput = document.getElementById('coherence'); // Determines how "close" a color is to the next computed random color.
+const opacityInput = document.getElementById('opacity'); // Determines the used opacity for the colors.
+const delayInput = document.getElementById('delay'); // Determines the delay after each drawing step in seconds.
+
+runButton.addEventListener('click', runColorAnimation);
+
+
+async function runColorAnimation() {
+    let cols = colNumberInput.value;
+    // Initialize the color grid.
+    await makeGrid(cols);
+
+    let coherence = coherenceInput.value;
+    let opacity = opacityInput.value;
+    let delay = delayInput.value / (10 * cols);
+
+    await simpleAnimation(cols, delay, coherence, opacity);
+
+    // Get the id of the initial grid-item.
+    // let totalNumber = Math.pow(cols, 2);
+    // let firstGridItemId = getFirstGridItemId(totalNumber);
+    // let coloredItems = [];
+
+    // Run the drawing animation.
+    //drawingAnimation(cols);
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function simpleAnimation(cols, delay, coherence, opacity) {
+    let total = cols * cols;
+    let color = getRandomColor(coherence, opacity);
+    let prevColor = color;
+
+    for (let i = 0; i < total; i++) {
+        let gridItem = document.getElementById(`grid-item-${i}`);
+        if (gridItem) {
+            gridItem.style.backgroundColor = color;
+        }
+
+        // Prepare next color before waiting
+        prevColor = color;
+        color = getRandomColor(coherence, opacity, prevColor);
+
+        // Wait before next iteration
+        await sleep(delay);
+    }
+}
+
+/**
+ * Runs the drawing animation.
+ */
+function drawingAnimation(cols) {
+    let coherence = coherenceInput.value;
+    let opacity = opacityInput.value;
+
+
+
+    while (coloredItems.length < totalNumber - 1) {
+
+    }
+    // let gridItem = document.querySelector("#grid-item-10");
+    // gridItem.style.backgroundColor = color;
+}
+
+function getFirstGridItemId(totalNumber) {
+    let first = 0;
+    let startFrom = startFromSelect.value;
+    if (startFrom == 'center') {
+        first = Math.floor(totalNumber / 2);
+    }
+    return first;
+}
+
+/**
+ * Computes a random color.
+ * The coherence value determines how closely related the random color should be to the previous color.
+ * If set to 0.99 and #000000 was the prev color, the next color should not deviate a lot from the prev color.
+ * If coherence is set to 0, the computed color is random, meaning even if the previous color was red, the current random color
+ * can also be black.
+ * @param {Number} coherence Determines how "close" a color should be to the previous color (0 - no relation, 1 - same color)
+ * @param {Number} opacity The opacity of the color (0-1).
+ * @param {*} prevColor The previously used color.
+ */
+function getRandomColor(coherence, opacity, prevColor = null) {
+    let r, g, b;
+
+    if (prevColor && typeof prevColor === "string") {
+        // Extract RGB from hex or rgba.
+        let prevRGB;
+
+        if (prevColor.startsWith("#")) {
+            prevRGB = hexToRgb(prevColor);
+        } else if (prevColor.startsWith("rgb")) {
+            prevRGB = prevColor
+                .replace(/[^\d,]/g, '')
+                .split(',')
+                .slice(0, 3)
+                .map(Number);
+        }
+        // Generate new color with controlled variation
+        [r, g, b] = prevRGB.map(channel => {
+            const maxDeviation = (1 - coherence) * 255;
+            const variation = (Math.random() * 2 - 1) * maxDeviation;
+            return clamp(Math.round(channel + variation), 0, 255);
+        });
+    } else {
+        // No previous color or coherence = 0, so generate random
+        r = Math.floor(Math.random() * 256);
+        g = Math.floor(Math.random() * 256);
+        b = Math.floor(Math.random() * 256);
+    }
+
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}
+
+function hexToRgb(hex) {
+    const bigint = parseInt(hex.replace('#', ''), 16);
+    return [
+        (bigint >> 16) & 255,
+        (bigint >> 8) & 255,
+        bigint & 255
+    ];
+}
+
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
+
+/**
+ * Fills the color-container with the initial grid.
+*/
+async function makeGrid(cols) {
+    let gridItemNumber = Math.pow(cols, 2);
+    let gridItemWidth = size / cols;
+    let gridItemHeight = size / cols;
+
+    // Clear the placeholder.
+    colorContainer.innerHTML = "";
+
+    const fragment = document.createDocumentFragment();
+    // Insert the number of items with the specified dimensions into the colorContainer.
+    for (let i = 0; i < gridItemNumber; i++) {
+        const div = document.createElement("div");
+
+        // Assign unique id to the grid-items.
+        div.id = `grid-item-${i}`;
+
+        div.style.width = `${gridItemWidth}px`;
+        div.style.height = `${gridItemHeight}px`;
+        div.classList.add("grid-item");
+
+        fragment.appendChild(div);
+    }
+
+    colorContainer.appendChild(fragment);
+}
