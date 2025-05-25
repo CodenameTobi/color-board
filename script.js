@@ -10,6 +10,7 @@ const colNumberInput = document.getElementById('cols'); // Determines the size o
 const coherenceInput = document.getElementById('coherence'); // Determines how "close" a color is to the next computed random color.
 const opacityInput = document.getElementById('opacity'); // Determines the used opacity for the colors.
 const delayInput = document.getElementById('delay'); // Determines the delay after each drawing step in seconds.
+const bgColor = document.getElementById('bg-color');
 
 runButton.addEventListener('click', runColorAnimation);
 stopButton.addEventListener('click', stopOrContinueAnimation);
@@ -20,12 +21,12 @@ let cancelAnimation = false;
 let isAnimating = 0;
 
 async function stopOrContinueAnimation() {
-    console.log(`isRunning: ${isRunning.value}, isAnimating: ${isAnimating}, animationPaused: ${animationPaused}`);
+    // console.log(`isRunning: ${isRunning.value}, isAnimating: ${isAnimating}, animationPaused: ${animationPaused}`);
     if (isAnimating < 1) return; // No animation, do nothing
 
     animationPaused = !animationPaused;
     isRunning.value = animationPaused ? "0" : "1";
-    stopButton.textContent = animationPaused ? "⏩" : "🛑";
+    stopButton.textContent = animationPaused ? "Continue" : "Stop";
 }
 
 async function runColorAnimation() {
@@ -34,7 +35,8 @@ async function runColorAnimation() {
     animationPaused = false;
     cancelAnimation = false;
     isRunning.value = "1";
-    stopButton.textContent = "🛑";
+    stopButton.textContent = "Stop";
+    document.documentElement.style.setProperty('--bg-color', bgColor.value);
 
     let prevCols = document.querySelectorAll('.grid-item');
     let cols = colNumberInput.value;
@@ -45,7 +47,7 @@ async function runColorAnimation() {
 
     let coherence = coherenceInput.value;
     let opacity = opacityInput.value;
-    let delay = delayInput.value / (1000 * cols);
+    let delay = delayInput.value;
 
     await drawingAnimation(cols, delay, coherence, opacity);
 
@@ -96,7 +98,6 @@ async function drawingAnimation(cols, delay, coherence, opacity) {
                 visited.add(n);
             }
         }
-
         await sleep(delay);
     }
 }
@@ -204,11 +205,12 @@ function clamp(value, min, max) {
 */
 async function makeGrid(cols) {
     let gridItemNumber = Math.pow(cols, 2);
-    let gridItemWidth = colorContainer.offsetWidth / cols;
-    let gridItemHeight = colorContainer.offsetWidth / cols;
+    // let gridItemWidth = colorContainer.offsetWidth / cols;
+    // let gridItemHeight = colorContainer.offsetWidth / cols;
 
     // Clear the placeholder.
     colorContainer.innerHTML = "";
+    colorContainer.style.setProperty('--cols', cols);
 
     const fragment = document.createDocumentFragment();
     // Insert the number of items with the specified dimensions into the colorContainer.
@@ -217,11 +219,7 @@ async function makeGrid(cols) {
 
         // Assign unique id to the grid-items.
         div.id = `grid-item-${i}`;
-
-        div.style.width = `${gridItemWidth}px`;
-        div.style.height = `${gridItemHeight}px`;
         div.classList.add("grid-item");
-
         fragment.appendChild(div);
     }
 
@@ -240,8 +238,10 @@ function reset() {
     colorContainer.innerHTML = "";
     const div = document.createElement("div");
     div.classList.add("placeholder");
+    div.classList.add("grid-item");
     colorContainer.appendChild(div);
+    colorContainer.style.setProperty('--cols', 1);
 
     isRunning.value = "0";
-    stopButton.textContent = "🛑";
+    stopButton.textContent = "Stop";
 }

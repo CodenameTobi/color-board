@@ -11,7 +11,7 @@
             <div id="run-button-container" class="run-button-container">
                 <button id="run-button" class="run-button">Draw Color Animation</button>
                 <div class="control-row">
-                    <button id="stop-button" class="stop-button">🛑</button>
+                    <button id="stop-button" class="stop-button">Stop</button>
                     <button id="reset-button" class="stop-button">Reset</button>
                     <div class="info">
                         <span id="counter">0</span>
@@ -36,21 +36,26 @@
                         </select>
                     </div>
                     <div class="label-input-container">
-                        <label for="cols">Columns</label>
-                        <input id="cols" name="cols" type="number" min="10" max="1000" step="1" value="25" />
+                        <label for="cols">Size</label>
+                        <input id="cols" class="myinput" name="cols" type="number" min="10" max="1000" step="1" value="42" />
                     </div>
                     <div class="label-input-container">
                         <label for="coherence">Coherence</label>
-                        <input id="coherence" name="coherence" type="number" min="0" max="0.99" step="0.01" value="0.9" />
+                        <input id="coherence" class="myinput" name="coherence" type="number" min="0" max="0.99" step="0.01" value="0.9" />
                     </div>
                     <div class="label-input-container">
                         <label for="opacity">Opacity</label>
-                        <input id="opacity" name="opacity" type="number" min="0.3" max="1" step="0.05" value="1" />
+                        <input id="opacity" class="myinput" name="opacity" type="number" min="0.3" max="1" step="0.05" value="1" />
                     </div>
                     <div class="label-input-container">
-                        <label for="delay">Delay</label>
-                        <input id="delay" name="delay" type="number" min="0" max="1000" step="1" value="50" />
+                        <label for="delay">Delay (ms)</label>
+                        <input id="delay" class="myinput" name="delay" type="number" min="0" max="1000" step="1" value="0" />
                     </div>
+                    <div class="label-input-container">
+                        <label for="bg-color">Background Color</label>
+                        <input id="bg-color" name="bg-color" type="color" value="#2c2c2c"/>
+                    </div>
+                    
                 </div>
             </div>
         </div>
