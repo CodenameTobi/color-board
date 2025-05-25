@@ -18,22 +18,12 @@ async function runColorAnimation() {
 
     let coherence = coherenceInput.value;
     let opacity = opacityInput.value;
-    let delay = delayInput.value / (10 * cols);
+    let delay = delayInput.value / (1000 * cols);
 
-    await simpleAnimation(cols, delay, coherence, opacity);
-
-    // Get the id of the initial grid-item.
-    // let totalNumber = Math.pow(cols, 2);
-    // let firstGridItemId = getFirstGridItemId(totalNumber);
-    // let coloredItems = [];
-
-    // Run the drawing animation.
-    //drawingAnimation(cols);
+    // await simpleAnimation(cols, delay, coherence, opacity);
+    await drawingAnimation(cols, delay, coherence, opacity);
 }
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 async function simpleAnimation(cols, delay, coherence, opacity) {
     let total = cols * cols;
@@ -57,25 +47,76 @@ async function simpleAnimation(cols, delay, coherence, opacity) {
 
 /**
  * Runs the drawing animation.
- */
-function drawingAnimation(cols) {
-    let coherence = coherenceInput.value;
-    let opacity = opacityInput.value;
+*/
+async function drawingAnimation(cols, delay, coherence, opacity) {
+    let total = cols * cols;
+    let color = await getRandomColor(coherence, opacity);
+    let prevColor = color;
+    let uncolored = new Set(Array.from({ length: total }, (_, i) => i)); // O(1) lookup and delete
+    const queue = [];
+    const visited = new Set(); // Optional: to avoid pushing same item twice
+    const first = await getFirstGridItemId(cols);
+    queue.push(first);
+    visited.add(first);
 
+    while (uncolored.size > 0 && queue.length > 0) {
+        let next = queue.shift();
+        if (!uncolored.has(next)) continue; // Skip if already colored (just in case)
 
+        let gridItem = document.getElementById(`grid-item-${next}`);
+        if (gridItem) {
+            gridItem.style.backgroundColor = color;
+        }
 
-    while (coloredItems.length < totalNumber - 1) {
+        uncolored.delete(next); // O(1) delete
+        prevColor = color;
+        color = await getRandomColor(coherence, opacity, prevColor);
 
+        let neighbors = getUncoloredNeighbors(next, cols, uncolored);
+        for (let n of neighbors) {
+            if (!visited.has(n)) {
+                queue.push(n);
+                visited.add(n);
+            }
+        }
+
+        await sleep(delay);
     }
-    // let gridItem = document.querySelector("#grid-item-10");
-    // gridItem.style.backgroundColor = color;
 }
 
-function getFirstGridItemId(totalNumber) {
+function getUncoloredNeighbors(item, cols, uncoloredSet) {
+    let row = Math.floor(item / cols);
+    let col = item % cols;
+    let neighbors = [];
+
+    const tryAdd = (r, c) => {
+        if (r >= 0 && r < cols && c >= 0 && c < cols) {
+            let id = r * cols + c;
+            if (uncoloredSet.has(id)) neighbors.push(id);
+        }
+    };
+
+    tryAdd(row - 1, col); // up
+    tryAdd(row + 1, col); // down
+    tryAdd(row, col - 1); // left
+    tryAdd(row, col + 1); // right
+
+    return neighbors;
+}
+
+
+/**
+ *  
+ * @param {Number} cols 
+ * @returns 
+ */
+async function getFirstGridItemId(cols) {
     let first = 0;
     let startFrom = startFromSelect.value;
     if (startFrom == 'center') {
-        first = Math.floor(totalNumber / 2);
+        first = cols % 2 == 0 ?
+            Math.floor((cols * cols) / 2 + cols / 2) :
+            Math.floor((cols * cols) / 2);
     }
     return first;
 }
@@ -89,8 +130,8 @@ function getFirstGridItemId(totalNumber) {
  * @param {Number} coherence Determines how "close" a color should be to the previous color (0 - no relation, 1 - same color)
  * @param {Number} opacity The opacity of the color (0-1).
  * @param {*} prevColor The previously used color.
- */
-function getRandomColor(coherence, opacity, prevColor = null) {
+*/
+async function getRandomColor(coherence, opacity, prevColor = null) {
     let r, g, b;
 
     if (prevColor && typeof prevColor === "string") {
@@ -162,4 +203,8 @@ async function makeGrid(cols) {
     }
 
     colorContainer.appendChild(fragment);
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
