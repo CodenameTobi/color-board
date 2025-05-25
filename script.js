@@ -1,6 +1,9 @@
 const colorContainer = document.getElementById('color-container');
 const size = 600; // Change if px size of colorContainer changes.
 const runButton = document.getElementById('run-button');
+const stopButton = document.getElementById('stop-button');
+const resetButton = document.getElementById('reset-button');
+const isRunning = document.getElementById('is-running');
 const placeholder = document.getElementById('placeholder');
 const startFromSelect = document.getElementById('start-from');
 const colNumberInput = document.getElementById('cols'); // Determines the size of the grid.
@@ -9,20 +12,65 @@ const opacityInput = document.getElementById('opacity'); // Determines the used 
 const delayInput = document.getElementById('delay'); // Determines the delay after each drawing step in seconds.
 
 runButton.addEventListener('click', runColorAnimation);
+stopButton.addEventListener('click', stopOrContinueAnimation);
+resetButton.addEventListener('click', reset);
 
+let animationPaused = false;
+let cancelAnimation = false;
+let isAnimating = false;
+
+function reset() {
+    cancelAnimation = true;
+    animationPaused = false;
+    isAnimating = false;
+
+    colorContainer.innerHTML = "";
+    const div = document.createElement("div");
+    div.classList.add("placeholder");
+    colorContainer.appendChild(div);
+
+    isRunning.value = "0";
+    runButton.disabled = false;
+    stopButton.disabled = true;
+    stopButton.textContent = "🛑";
+}
+
+async function stopOrContinueAnimation() {
+    if (!isAnimating) return; // No animation, do nothing
+
+    animationPaused = !animationPaused;
+    isRunning.value = animationPaused ? "0" : "1";
+
+    runButton.disabled = animationPaused;
+    stopButton.textContent = animationPaused ? "⏩" : "🛑";
+}
 
 async function runColorAnimation() {
+    isAnimating = true;
+    animationPaused = false;
+    cancelAnimation = false;
+
+    isRunning.value = "1";
+    stopButton.disabled = false;
+
+    let prevCols = document.querySelectorAll('.grid-item');
     let cols = colNumberInput.value;
-    // Initialize the color grid.
-    await makeGrid(cols);
+
+    if (cols * cols != prevCols.length) {
+        await makeGrid(cols);
+    }
 
     let coherence = coherenceInput.value;
     let opacity = opacityInput.value;
     let delay = delayInput.value / (1000 * cols);
 
-    // await simpleAnimation(cols, delay, coherence, opacity);
     await drawingAnimation(cols, delay, coherence, opacity);
+
+    isRunning.value = "0";
+    stopButton.disabled = true;
+    isAnimating = false; // ✅ done
 }
+
 
 
 async function simpleAnimation(cols, delay, coherence, opacity) {
@@ -49,6 +97,8 @@ async function simpleAnimation(cols, delay, coherence, opacity) {
  * Runs the drawing animation.
 */
 async function drawingAnimation(cols, delay, coherence, opacity) {
+    cancelAnimation = false; // Reset after beginning.
+
     let total = cols * cols;
     let color = await getRandomColor(coherence, opacity);
     let prevColor = color;
@@ -60,6 +110,12 @@ async function drawingAnimation(cols, delay, coherence, opacity) {
     visited.add(first);
 
     while (uncolored.size > 0 && queue.length > 0) {
+        if (cancelAnimation) break; // Stop if reset was called.
+
+        while (animationPaused) {
+            await sleep(100); // Wait in small intervalls until resumed.
+        }
+
         let next = queue.shift();
         if (!uncolored.has(next)) continue; // Skip if already colored (just in case)
 
@@ -117,6 +173,12 @@ async function getFirstGridItemId(cols) {
         first = cols % 2 == 0 ?
             Math.floor((cols * cols) / 2 + cols / 2) :
             Math.floor((cols * cols) / 2);
+    } else if (startFrom == 'top-right') {
+        first = cols - 1;
+    } else if (startFrom == 'bottom-left') {
+        first = cols * cols - cols;
+    } else if (startFrom == 'bottom-right') {
+        first = cols * cols - 1;
     }
     return first;
 }
