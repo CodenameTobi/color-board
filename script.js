@@ -17,12 +17,12 @@ resetButton.addEventListener('click', reset);
 
 let animationPaused = false;
 let cancelAnimation = false;
-let isAnimating = false;
+let isAnimating = 0;
 
 function reset() {
     cancelAnimation = true;
     animationPaused = false;
-    isAnimating = false;
+    isAnimating = 0;
 
     colorContainer.innerHTML = "";
     const div = document.createElement("div");
@@ -31,12 +31,12 @@ function reset() {
 
     isRunning.value = "0";
     runButton.disabled = false;
-    stopButton.disabled = true;
     stopButton.textContent = "🛑";
 }
 
 async function stopOrContinueAnimation() {
-    if (!isAnimating) return; // No animation, do nothing
+    console.log(`isRunning: ${isRunning.value}, isAnimating: ${isAnimating}, animationPaused: ${animationPaused}`);
+    if (isAnimating < 1) return; // No animation, do nothing
 
     animationPaused = !animationPaused;
     isRunning.value = animationPaused ? "0" : "1";
@@ -46,12 +46,11 @@ async function stopOrContinueAnimation() {
 }
 
 async function runColorAnimation() {
-    isAnimating = true;
+    isAnimating++;
     animationPaused = false;
     cancelAnimation = false;
 
     isRunning.value = "1";
-    stopButton.disabled = false;
 
     let prevCols = document.querySelectorAll('.grid-item');
     let cols = colNumberInput.value;
@@ -67,8 +66,7 @@ async function runColorAnimation() {
     await drawingAnimation(cols, delay, coherence, opacity);
 
     isRunning.value = "0";
-    stopButton.disabled = true;
-    isAnimating = false; // ✅ done
+    isAnimating--;
 }
 
 
