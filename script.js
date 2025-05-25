@@ -19,29 +19,12 @@ let animationPaused = false;
 let cancelAnimation = false;
 let isAnimating = 0;
 
-function reset() {
-    cancelAnimation = true;
-    animationPaused = false;
-    isAnimating = 0;
-
-    colorContainer.innerHTML = "";
-    const div = document.createElement("div");
-    div.classList.add("placeholder");
-    colorContainer.appendChild(div);
-
-    isRunning.value = "0";
-    runButton.disabled = false;
-    stopButton.textContent = "🛑";
-}
-
 async function stopOrContinueAnimation() {
     console.log(`isRunning: ${isRunning.value}, isAnimating: ${isAnimating}, animationPaused: ${animationPaused}`);
     if (isAnimating < 1) return; // No animation, do nothing
 
     animationPaused = !animationPaused;
     isRunning.value = animationPaused ? "0" : "1";
-
-    runButton.disabled = animationPaused;
     stopButton.textContent = animationPaused ? "⏩" : "🛑";
 }
 
@@ -49,8 +32,8 @@ async function runColorAnimation() {
     isAnimating++;
     animationPaused = false;
     cancelAnimation = false;
-
     isRunning.value = "1";
+    stopButton.textContent = "🛑";
 
     let prevCols = document.querySelectorAll('.grid-item');
     let cols = colNumberInput.value;
@@ -67,28 +50,6 @@ async function runColorAnimation() {
 
     isRunning.value = "0";
     isAnimating--;
-}
-
-
-
-async function simpleAnimation(cols, delay, coherence, opacity) {
-    let total = cols * cols;
-    let color = getRandomColor(coherence, opacity);
-    let prevColor = color;
-
-    for (let i = 0; i < total; i++) {
-        let gridItem = document.getElementById(`grid-item-${i}`);
-        if (gridItem) {
-            gridItem.style.backgroundColor = color;
-        }
-
-        // Prepare next color before waiting
-        prevColor = color;
-        color = getRandomColor(coherence, opacity, prevColor);
-
-        // Wait before next iteration
-        await sleep(delay);
-    }
 }
 
 /**
@@ -267,4 +228,18 @@ async function makeGrid(cols) {
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function reset() {
+    cancelAnimation = true;
+    animationPaused = false;
+    isAnimating = 0;
+
+    colorContainer.innerHTML = "";
+    const div = document.createElement("div");
+    div.classList.add("placeholder");
+    colorContainer.appendChild(div);
+
+    isRunning.value = "0";
+    stopButton.textContent = "🛑";
 }
