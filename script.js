@@ -1,5 +1,4 @@
 const colorContainer = document.getElementById('color-container');
-const size = 600; // Change if px size of colorContainer changes.
 const runButton = document.getElementById('run-button');
 const stopButton = document.getElementById('stop-button');
 const resetButton = document.getElementById('reset-button');
@@ -51,7 +50,7 @@ async function runColorAnimation() {
     await drawingAnimation(cols, delay, coherence, opacity);
 
     isRunning.value = "0";
-    isAnimating--;
+    if (isAnimating > 0) isAnimating--;
     counterSpan.textContent = isAnimating;
 }
 
@@ -205,8 +204,8 @@ function clamp(value, min, max) {
 */
 async function makeGrid(cols) {
     let gridItemNumber = Math.pow(cols, 2);
-    let gridItemWidth = size / cols;
-    let gridItemHeight = size / cols;
+    let gridItemWidth = colorContainer.offsetWidth / cols;
+    let gridItemHeight = colorContainer.offsetWidth / cols;
 
     // Clear the placeholder.
     colorContainer.innerHTML = "";
