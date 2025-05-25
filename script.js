@@ -3,6 +3,7 @@ const size = 600; // Change if px size of colorContainer changes.
 const runButton = document.getElementById('run-button');
 const stopButton = document.getElementById('stop-button');
 const resetButton = document.getElementById('reset-button');
+const counterSpan = document.getElementById('counter');
 const isRunning = document.getElementById('is-running');
 const placeholder = document.getElementById('placeholder');
 const startFromSelect = document.getElementById('start-from');
@@ -30,6 +31,7 @@ async function stopOrContinueAnimation() {
 
 async function runColorAnimation() {
     isAnimating++;
+    counterSpan.textContent = isAnimating;
     animationPaused = false;
     cancelAnimation = false;
     isRunning.value = "1";
@@ -50,6 +52,7 @@ async function runColorAnimation() {
 
     isRunning.value = "0";
     isAnimating--;
+    counterSpan.textContent = isAnimating;
 }
 
 /**
